@@ -4,6 +4,9 @@ import (
 	"fmt"
 
 	"github.com/polyk005/locale"
+	"github.com/polyk005/locale/internal/handler"
+	"github.com/polyk005/locale/internal/repository"
+	"github.com/polyk005/locale/internal/service"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"github.com/subosito/gotenv"
@@ -21,11 +24,11 @@ func main() {
 		logrus.Fatalf("Error loading config: %s", err.Error())
 	}
 	db, err := repository.NewPostgres(repository.Config{
-		Host: viper.GetString("DB.HOST"),
-		Port: viper.GetString("DB.PORT"),
+		Host:     viper.GetString("DB.HOST"),
+		Port:     viper.GetString("DB.PORT"),
 		Username: viper.GetString("DB.USERNAME"),
-		DBName: viper.GetString("DB.DBNAME"),
-		SSLMode: viper.GetString("DB.SSLMODE"),
+		DBName:   viper.GetString("DB.DBNAME"),
+		SSLMode:  viper.GetString("DB.SSLMODE"),
 		Password: viper.GetString("DB.PASSWORD"),
 	})
 	if err != nil {
@@ -35,7 +38,6 @@ func main() {
 	repos := repository.NewRepository(db)
 	services := service.NewService(repos)
 	handlers := handler.NewHandler(services)
-
 
 	srv := new(locale.Server)
 	if err := srv.Run(viper.GetString("port"), handlers.InitRoutes()); err != nil {
